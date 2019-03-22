@@ -100,6 +100,16 @@ export default {
 		this.chart.onChange(this.getChartParams());
 		this.chart.view.x = 0 - (this.chart.view.width * this.startDot); 
 	},
+	onResize:function(width, height){
+		this.width = width;
+		this.height = height;
+		this.app.renderer.resize(width, height);
+		this.toggle.clear();
+		this.renderToggle(this.toggle);
+		this.chart.onChange(this.getChartParams());
+		this.chartMap.onChange(this.createChartMap());
+		this.chartMap.view.y = this.height * 0.8;
+	},
 	dragLeft:function(x){
 		this.startDot = x;	
 	},
