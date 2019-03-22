@@ -68,8 +68,9 @@ export default {
 		})
 	},
 	
-	onChange:function({width}){
+	onChange:function({width, height}){
 		this.width = width;
+		this.height = height;
 		this.view.clear();
 		this.drawCharts();
 	},

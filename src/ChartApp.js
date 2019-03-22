@@ -50,14 +50,15 @@ export default {
 		var chart = Object.create(Chart);
 		var params = this.getChartParams();
 		chart.build(params);
-		chart.drawCharts(this.startDot, this.endDot)
+		chart.drawCharts();
+		chart.view.x = 0 - (chart.view.width * this.startDot); 
 		return chart;
 	},
 	createChartMap:function() {
 		var chartMap = Object.create(Chart);
 		var params = this.getChartMapParams();
 		chartMap.build(params);
-		chartMap.drawCharts(this.startDot, this.endDot)
+		chartMap.drawCharts();
 		return chartMap;
 	},
 	createToggle:function(){
