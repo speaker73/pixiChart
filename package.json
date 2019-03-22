@@ -1,0 +1,22 @@
+{
+  "name": "telegramgraph",
+  "version": "0.0.1",
+  "description": "Telgram graphics visualization",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "telegram",
+    "graphics"
+  ],
+  "author": "asteglor",
+  "license": "MIT",
+  "dependencies": {
+    "pixi.js": "^4.8.6"
+  },
+  "devDependencies": {
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}
