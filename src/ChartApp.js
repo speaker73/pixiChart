@@ -21,6 +21,7 @@ export default {
 		this.app.stage.addChild(this.chart.view);
 		
 		this.chartMap = this.createChartMap();
+		this.chartMap.view.y = this.height * 0.8;
 		this.app.stage.addChild(this.chartMap.view);
 
 		this.toggle = this.createToggle();
@@ -88,7 +89,7 @@ export default {
 		var y = this.height * 0.8;
 		var width = (this.width * this.endDot) - x;
 		var height = this.height * 0.1;
-		toggle.drawRect (x, y, width, height);
+		toggle.drawRect(x, y, width, height);
 		toggle.endFill();
 	},
 

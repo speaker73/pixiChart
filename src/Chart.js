@@ -12,15 +12,13 @@ function colorToHex(color){
 
 
 export default {
-	build:function({data, width, height, lineWidth, x, y}){
+	build:function({data, width, height, lineWidth}){
 		this.data = data;
 		this.height = height;
 		this.width = width;
 		this.charts = {};
 		this.lineWidth = lineWidth || 2;
 		this.view = new Graphics();
-		this.view.x = x;
-		this.view.y = y;
 	},
 	drawCharts:function(){
 		var data = this.data;
@@ -60,9 +58,10 @@ export default {
 		var xStart = this.xStart;
 		var yColumn = chart.yColumn;
 		var height = this.height;
-		view.moveTo(0, height - (yColumn[0] * ky ));
+		var y = height - (yColumn[0] * ky );
+		view.moveTo(0, y);
 		
-		this.xColumn.forEach(function(xs, id){
+		this.xColumn.slice(1).forEach(function(xs, id){
 			var x = (xs - xStart) * kx;
 			var y = height - (yColumn[id+1] * ky);
 			view.lineTo(x, y);
