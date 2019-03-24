@@ -12,9 +12,10 @@ function colorToHex(color){
 
 var defTextStyle = {fontFamily : 'Arial', fontSize: 12, align:'left', fill:"#FFFFFF" };
 export default {
-	build:function({data, width, height, lineWidth, showY, showX}){
+	build:function({data, width, height, lineWidth, showY, showX, excludeCharts}){
 		this.showX = showX;
 		this.showY = showY;
+		this.excludeCharts = excludeCharts  || [];
 		this.data = data;
 		this.height = height;
 		this.width = width;
@@ -28,6 +29,43 @@ export default {
 			this.panel.addChild(this.panel.graphics);
 			this.texts = [];
 			this.createText();
+		}
+		if(showX){
+			this.dateTexts = [];
+			this.bottomPanel = new Graphics();
+			this.createDates();
+		}
+
+	},
+	createDates:function(){
+		if(this.showX){
+			this.bottomPanel.beginFill(0x000000, 1);
+			var w = this.showX.width || 20;
+			var h = this.showY.height || 20;
+			this.bottomPanel.drawRect(0, this.height, w, h);
+			this.bottomPanel.endFill();
+			var textStyle = this.showY.textStyle || defTextStyle;	
+			for(var i=0; i<1; i+=0.1){
+				var text = new Text('1000', textStyle);
+				this.bottomPanel.addChild(text);
+				this.dateTexts.push(text);
+			}
+		}
+	},
+	setDates:function(){
+		if(this.showX){
+			var dateTexts = this.dateTexts.slice();
+			for(var i=0; i<1; i+=0.1){
+				var text = dateTexts.pop();
+				var x = this.showX.width * i;
+				text.x = x;
+				text.y = this.height * 1.01;
+				var trueX = x + this.view.x;
+				var sourceDate = trueX/this.kx + this.xStart;
+				var date =  new Date( Number(sourceDate.toFixed(0)) )
+				var dateStr = date.toDateString().split(' ');
+				text.text = dateStr[1] + ' ' + dateStr[2]
+			}
 		}
 	},
 	drawNumbers:function(){
@@ -81,14 +119,20 @@ export default {
 		var xStart = xColumn[0];
 		var maxX = Math.max.apply(null, xColumn) - xStart;
 		var kx = this.width/maxX;
-	
+		this.charts = {};
 
 		this.maxX = maxX;
 		this.xColumn = xColumn;
 		this.kx = kx;
 		this.xStart = xStart;
 		this.drawNumbers();
-		Object.keys(data.names).forEach(name =>{
+		var filteredCharts = Object.keys(data.names).filter(name =>
+				!this.excludeCharts.includes(name)
+			);
+		if(!filteredCharts.length){
+			return;
+		}
+		filteredCharts.forEach(name =>{
 			var yFinder = findColum(name);
 			var color = colorToHex( data.colors[name] );
 			var yColumn = data.columns.find(yFinder).slice(1);
@@ -108,10 +152,11 @@ export default {
 		this.ky = sortedCharts[0].ky;
 		var that = this;
 		this.drawNumbers();
-		Object.keys(this.charts).forEach(function(name){
+		filteredCharts.forEach(function(name){
 			that.view.lineStyle(that.lineWidth, that.charts[name].color );
 			that.drawChart(name);
-		})
+		});
+		this.setDates();
 	},
 	drawChart:function(name){
 		var chart  = this.charts[name];
@@ -131,9 +176,12 @@ export default {
 		})
 	},
 	
-	onChange:function({width, height}){
+	onChange:function({width, height, showX, showY, excludeCharts}){
 		this.width = width;
 		this.height = height;
+		this.showY = showY;
+		this.showX = showX;
+		this.excludeCharts = excludeCharts;
 		this.view.clear();
 		this.drawCharts();
 		this.setNumbers();

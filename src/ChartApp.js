@@ -4,9 +4,15 @@ import Chart from './Chart';
 var options = {
 	antialias: true,
 };
+
+function colorToHex(color){
+	return Number("0x" +  String(color).slice(1))
+}
+
+
 export default {
 	create:function(containerId, data, width, height, startDot, endDot){
-		this.CHART_HEIGHT = 0.7;
+		this.CHART_HEIGHT = 0.6;
 		this.CHART_MAP_HEIGHT = 0.1;
 		this.MIN_TOGGLE = 0.1;
 		this.SHADOW_ALPHA = 0.3;
@@ -25,6 +31,7 @@ export default {
 		this.chart = this.createChart();
 		this.app.stage.addChild(this.chart.view);
 		this.app.stage.addChild(this.chart.panel);
+		this.app.stage.addChild(this.chart.bottomPanel);
 		this.chartMap = this.createChartMap();
 		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
 		this.app.stage.addChild(this.chartMap.view);	
@@ -33,9 +40,57 @@ export default {
 		this.afterToggle = new Graphics();
 		this.renderBeforeToggle(this.beforeToggle);
 		this.renderAfterToggle(this.afterToggle);
+		this.createChartTumblers();
 		this.app.stage.addChild(this.toggle);
 		this.app.stage.addChild(this.beforeToggle);
 		this.app.stage.addChild(this.afterToggle);
+	},
+	createChartTumblers:function(){
+		this.excludeCharts = [];
+		this.tumblers = [];
+		Object.keys(this.data.names).forEach(( yName, id )=>{
+			var tumbler = new Graphics();
+			var name = this.data.names[yName];
+			var color = colorToHex(this.data.colors[yName] );
+			tumbler.interactive = true;
+			tumbler.buttonMode = true;
+			var onTumb = ()=>{
+				if(this.excludeCharts.includes(yName) ){
+					this.excludeCharts = this.excludeCharts.filter(na=> na!== yName);
+				}else{
+					this.excludeCharts.push(yName);
+				}
+				this.onChange();
+			}
+
+			tumbler
+				.on("mouseup", ()=>{
+					onTumb();
+				})
+				.on('touchend', ()=>{
+					onTumb();
+				})
+			this.tumblers.push({tumbler, name, color, id, yName});
+			this.renderTumbler(tumbler, color, name, id, yName);
+			this.app.stage.addChild(tumbler);
+		})
+	},
+	renderTumblers:function(){
+		var that = this;
+		this.tumblers.forEach(function({tumbler, name, color, id, yName}){
+			tumbler.clear();
+			that.renderTumbler(tumbler, color, name, id, yName);
+		})
+	},
+	renderTumbler:function(tumbler, color, name, id, yName){
+		var alpha = this.excludeCharts.includes(yName)?0.4:1;
+		var radius = this.height * 0.05;
+		var diametr = radius*2;
+		var x = radius + (diametr+radius/2) * id; 
+		var y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT + 0.2)
+		tumbler.beginFill(color, alpha);
+		tumbler.drawCircle(x, y, radius);
+		tumbler.endFill();
 	},
 	getChartParams:function(){
 		return {
@@ -47,7 +102,12 @@ export default {
 			showY:{
 				width:50,
 				background:0x000000
-			}
+			},
+			showX:{
+				width:this.width,
+				height:50
+			},
+			excludeCharts:this.excludeCharts
 		}
 	},
 	getChartMapParams:function(){
@@ -57,6 +117,7 @@ export default {
 			height:this.height * this.CHART_MAP_HEIGHT,
 			x:0,
 			y:this.height * (this.CHART_MAP_HEIGHT + this.CHART_HEIGHT),
+			excludeCharts:this.excludeCharts
 		}
 	},
 	createChart:function() {
@@ -134,9 +195,6 @@ export default {
 		toggle.moveTo(x+width, y);
 		toggle.lineTo(x+width, y+height);
 	},
-	renderDate:function(){
-		//@todo add render date
-	},
 	onChange:function(){
 		this.toggle.clear();
 		this.beforeToggle.clear();
@@ -146,6 +204,9 @@ export default {
 		this.renderAfterToggle(this.afterToggle);
 		this.chart.onChange(this.getChartParams());
 		this.chart.view.x = 0 - (this.chart.view.width * this.startDot);
+		this.chartMap.onChange(this.getChartMapParams() );
+		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
+		this.renderTumblers();
 	},
 	onResize:function(width, height){
 		this.width = width;
@@ -158,11 +219,11 @@ export default {
 		this.renderToggle(this.toggle);
 		this.renderBeforeToggle(this.beforeToggle);
 		this.renderAfterToggle(this.afterToggle);
-
+		this.renderTumblers();
 		this.chart.onChange(this.getChartParams());
 		this.chartMap.onChange(this.createChartMap());
 		this.chart.view.x = 0 - (this.chart.view.width * this.startDot); 
-		this.chartMap.view.y = this.height * 0.8;
+		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
 	},
 	dragLeft:function(x){
 		if(x >= (this.endDot - this.MIN_TOGGLE)) {
