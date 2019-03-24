@@ -202,6 +202,7 @@ export default {
 		var stepKy = (ky - this.ky)/stepCount;
 		let steps = 0;
 		this.isAnimated = true;
+		var that = this;
 		var intervalId = setInterval(()=>{
 			steps++;
 			this.view.clear();
@@ -218,10 +219,10 @@ export default {
 				this.renderVerticalLine()
 			}
 			
-			var that = this;
+			
 			this.drawNumbers();
 			filteredCharts.forEach(function(name){
-				that.view.lineStyle(that.lineWidth, that.charts[name].color );
+				that.view.lineStyle(that.lineWidth, colorToHex(that.data.colors[name]) );
 				that.drawChart(name);
 			});
 			this.setDates();
@@ -233,7 +234,7 @@ export default {
 		var kx = this.kx;
 		var ky = this.ky;
 		var xStart = this.xStart;
-		var yColumn = chart.yColumn;
+		var yColumn = chart ? chart.yColumn: this.data.columns.find(findColum(name)).slice(1);;
 		var height = this.height;
 		var y = height - (yColumn[0] * ky );
 		view.moveTo(0, y);
