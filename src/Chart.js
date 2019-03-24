@@ -91,7 +91,7 @@ export default {
 				var x = this.showX.width * i;
 				text.x = x;
 				text.y = this.height * 1.01;
-				var trueX = x + this.view.x;
+				var trueX = x - this.view.x;
 				var sourceDate = trueX/this.kx + this.xStart;
 				var date =  new Date( Number(sourceDate.toFixed(0)) )
 				var dateStr = date.toDateString().split(' ');
