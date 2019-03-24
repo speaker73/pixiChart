@@ -29,14 +29,6 @@ export default {
 		document.getElementById(containerId).appendChild(this.app.view);
 		
 		this.chart = this.createChart();
-		this.chart.view.interactive = true;
-		this.chart.view
-		.on("mouseup", (e)=>{
-			this.onChartPress(e);
-		})
-		.on('touchend', (e)=>{
-			this.onChartPress(e);
-		})
 		this.app.stage.addChild(this.chart.view);
 		this.app.stage.addChild(this.chart.panel);
 		this.app.stage.addChild(this.chart.bottomPanel);
@@ -50,6 +42,22 @@ export default {
 		this.renderAfterToggle(this.afterToggle);
 		this.createChartTumblers();
 		this.line = new Graphics();
+		this.line.interactive = true;
+		this.line.buttonMode = true;
+		var that = this;
+		this.line.on('mousedown', onDragStart)
+	        .on('touchstart', onDragStart)
+	        // events for drag end
+	        .on('mouseup', onDragEnd)
+	        .on('mouseupoutside', onDragEnd)
+	        .on('touchend', onDragEnd)
+	        .on('touchendoutside', onDragEnd)
+	        .on('mousemove', function(event){
+	        	that.onDragMoveLine(event, this);
+	        })
+	        .on('touchmove', function(event){
+	        	that.onDragMoveLine(event, this);
+	        })
 		this.lineTextContainer = new Container();
 		this.lineTextContainer.name = 'lineTextContainer';
 		this.lineTexts = [];
@@ -68,9 +76,9 @@ export default {
 		var x = event.data.global.x;
 	},
 	renderVerticalLine:function(line){
-		var dots = this.chart.getChartDots(this.width*0.5)
+		var dots = this.chart.getChartDots(this.width*this.lineCord)
 		line.lineStyle(1, 0xFFFFFF, 1, true);
-		var x = dots.length?dots[0].x : this.width*0.5;
+		var x = dots.length?dots[0].x : this.width*this.lineCord;
 		line.moveTo(x, 0);
 		line.lineTo(x, this.CHART_HEIGHT * this.height);
 		let text = "";
@@ -346,6 +354,22 @@ export default {
 	  			self.startX = event.data.global.x;
 	  		}
 	  		
+			this.onChange();	
+	    }
+	},
+	onDragMoveLine:function(event, self){
+    	if (self.dragging)
+	    {	
+	    	var deltaX = event.data.global.x - self.startX;
+	    	var updatedLineCord = this.lineCord + deltaX/this.width;
+	    	if(updatedLineCord >= 0.98){
+	    		updatedLineCord = 0.98
+	    	}
+	    	if(updatedLineCord <= 0){
+	    		updatedLineCord = 0
+	    	}
+	    	this.lineCord = updatedLineCord;
+	    	self.startX = event.data.global.x;
 			this.onChange();	
 	    }
 	}
