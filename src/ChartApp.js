@@ -41,9 +41,24 @@ export default {
 		this.renderBeforeToggle(this.beforeToggle);
 		this.renderAfterToggle(this.afterToggle);
 		this.createChartTumblers();
+		this.line = new Graphics();
+		this.renderVerticalLine(this.line);
 		this.app.stage.addChild(this.toggle);
 		this.app.stage.addChild(this.beforeToggle);
 		this.app.stage.addChild(this.afterToggle);
+		this.app.stage.addChild(this.line);
+	},
+	renderVerticalLine:function(line){
+		var dots = this.chart.getChartDots(this.width*0.5)
+		line.lineStyle(1, 0xFFFFFF, 1, true);
+		var x = dots.length?dots[0].x : this.width*0.5;
+		line.moveTo(x, 0);
+		line.lineTo(x, this.CHART_HEIGHT * this.height);
+		dots.forEach(({color, y})=>{
+			line.beginFill(color, 1);
+		    line.drawCircle(x, y, 4);
+		})
+		line.endFill();
 	},
 	createChartTumblers:function(){
 		this.excludeCharts = [];
@@ -207,6 +222,8 @@ export default {
 		this.chartMap.onChange(this.getChartMapParams() );
 		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
 		this.renderTumblers();
+		this.line.clear();
+		this.renderVerticalLine(this.line);
 	},
 	onResize:function(width, height){
 		this.width = width;
@@ -224,6 +241,8 @@ export default {
 		this.chartMap.onChange(this.createChartMap());
 		this.chart.view.x = 0 - (this.chart.view.width * this.startDot); 
 		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
+		this.line.clear();
+		this.renderVerticalLine(this.line);
 	},
 	dragLeft:function(x){
 		if(x >= (this.endDot - this.MIN_TOGGLE)) {

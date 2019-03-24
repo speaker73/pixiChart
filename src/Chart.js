@@ -37,6 +37,37 @@ export default {
 		}
 
 	},
+	getChartDots:function(x){
+		var filteredCharts = Object.keys(this.data.names).filter(name =>
+				!this.excludeCharts.includes(name)
+		);
+		if(!filteredCharts.length){
+			return [];
+		}
+		var onChartX = -this.view.x + x;
+		var sourceDate = onChartX/this.kx + this.xStart;
+		var {id, val:xValue} = this.xColumn
+			.map(function(val, id){
+				return {val, id}
+			})
+			.find(function({val}){
+				return val >= sourceDate;
+			}) || {};
+
+		var result = filteredCharts.map( yName =>{
+			var chart = this.charts[yName];
+			var value = chart.yColumn[id];
+			return{
+				color : chart.color,
+				y: this.height - (value * this.ky),
+				name:this.data.names[yName],
+				value,
+				x:((xValue - this.xStart) * this.kx) + this.view.x,
+				yName
+			}	
+		})
+		return result
+	},
 	createDates:function(){
 		if(this.showX){
 			this.bottomPanel.beginFill(0x000000, 1);
