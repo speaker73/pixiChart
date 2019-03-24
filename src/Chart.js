@@ -12,7 +12,7 @@ function colorToHex(color){
 
 var defTextStyle = {fontFamily : 'Arial', fontSize: 12, align:'left', fill:"#FFFFFF" };
 export default {
-	build:function({data, width, height, lineWidth, showY, showX, excludeCharts}){
+	build:function({data, width, height, lineWidth, showY, showX, excludeCharts, renderVerticalLine}){
 		this.showX = showX;
 		this.showY = showY;
 		this.excludeCharts = excludeCharts  || [];
@@ -22,8 +22,9 @@ export default {
 		this.charts = {};
 		this.lineWidth = lineWidth || 2;
 		this.view = new Graphics();
-		
+		this.isAnimated = false;
 		if(showY){
+			this.renderVerticalLine = renderVerticalLine;
 			this.panel = new Container();
 			this.panel.graphics = new Graphics();
 			this.panel.addChild(this.panel.graphics);
@@ -95,7 +96,8 @@ export default {
 				var sourceDate = trueX/this.kx + this.xStart;
 				var date =  new Date( Number(sourceDate.toFixed(0)) )
 				var dateStr = date.toDateString().split(' ');
-				text.text = dateStr[1] + ' ' + dateStr[2]
+			
+				text.text = dateStr[1] + ' ' + dateStr[2] //+ ' ' + dateStr[3]
 			}
 		}
 	},
@@ -179,15 +181,51 @@ export default {
 		const sortedCharts = Object.values(this.charts).sort(function(a, b){
 			return b.maxY - a.maxY;
 		})
-		this.maxY = sortedCharts[0].maxY;
-		this.ky = sortedCharts[0].ky;
-		var that = this;
-		this.drawNumbers();
-		filteredCharts.forEach(function(name){
-			that.view.lineStyle(that.lineWidth, that.charts[name].color );
-			that.drawChart(name);
-		});
-		this.setDates();
+		if(typeof this.maxY === 'number' && this.maxY !== sortedCharts[0].maxY){
+			this.tweenAnimation(sortedCharts[0].maxY, sortedCharts[0].ky, filteredCharts);
+		}else{
+			this.maxY = sortedCharts[0].maxY;
+			this.ky = sortedCharts[0].ky;
+			var that = this;
+			this.drawNumbers();
+			filteredCharts.forEach(function(name){
+				that.view.lineStyle(that.lineWidth, that.charts[name].color );
+				that.drawChart(name);
+			});
+			this.setDates();
+		}
+		
+	},
+	tweenAnimation:function(maxY, ky, filteredCharts){
+		var stepCount = 30;
+		var stepMaxY = (maxY - this.maxY)/stepCount;
+		var stepKy = (ky - this.ky)/stepCount;
+		let steps = 0;
+		this.isAnimated = true;
+		var intervalId = setInterval(()=>{
+			steps++;
+			this.view.clear();
+			if(steps >= stepCount){
+				clearInterval(intervalId);
+				this.isAnimated = false
+				this.maxY = maxY;
+				this.ky = ky;
+			}else{
+				this.maxY += stepMaxY;
+				this.ky += stepKy;
+			}
+			if(this.renderVerticalLine){
+				this.renderVerticalLine()
+			}
+			
+			var that = this;
+			this.drawNumbers();
+			filteredCharts.forEach(function(name){
+				that.view.lineStyle(that.lineWidth, that.charts[name].color );
+				that.drawChart(name);
+			});
+			this.setDates();
+		}, 16)
 	},
 	drawChart:function(name){
 		var chart  = this.charts[name];
@@ -216,9 +254,6 @@ export default {
 		this.view.clear();
 		this.drawCharts();
 		this.setNumbers();
-	},
-
-	onResize:function(width, height){
-
 	}
+
 }

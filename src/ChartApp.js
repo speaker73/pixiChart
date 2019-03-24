@@ -62,10 +62,10 @@ export default {
 		this.lineTextContainer.addChild(this.lineTextContainerRect);
 		this.app.stage.addChild(this.lineTextContainer);
 		this.renderVerticalLine(this.line);
+		this.onChangeBinded = this.onChange.bind(this);
 	},
 	onChartPress:function(event){
 		var x = event.data.global.x;
-
 	},
 	renderVerticalLine:function(line){
 		var dots = this.chart.getChartDots(this.width*0.5)
@@ -159,7 +159,12 @@ export default {
 				width:this.width,
 				height:50
 			},
-			excludeCharts:this.excludeCharts
+			excludeCharts:this.excludeCharts,
+			renderVerticalLine:()=>{
+				this.line.clear();
+				this.lineTextContainerRect.clear();
+				this.renderVerticalLine(this.line);
+			}
 		}
 	},
 	getChartMapParams:function(){
