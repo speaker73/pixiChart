@@ -1,4 +1,4 @@
-import { Application, Graphics } from 'pixi.js';
+import { Application, Graphics, Text, Container } from 'pixi.js';
 import Chart from './Chart';
 
 var options = {
@@ -9,14 +9,14 @@ function colorToHex(color){
 	return Number("0x" +  String(color).slice(1))
 }
 
-
+var defTextStyle = {fontFamily : 'Arial', fontSize: 12, align:'center', fill:"#000000" };
 export default {
 	create:function(containerId, data, width, height, startDot, endDot){
 		this.CHART_HEIGHT = 0.6;
 		this.CHART_MAP_HEIGHT = 0.1;
 		this.MIN_TOGGLE = 0.1;
 		this.SHADOW_ALPHA = 0.3;
-
+		this.lineCord = 0.5;
 		this.dragLeft = this.dragLeft.bind(this);
 		this.move = this.move.bind(this);
 		this.dragRight = this.dragRight.bind(this);
@@ -29,6 +29,14 @@ export default {
 		document.getElementById(containerId).appendChild(this.app.view);
 		
 		this.chart = this.createChart();
+		this.chart.view.interactive = true;
+		this.chart.view
+		.on("mouseup", (e)=>{
+			this.onChartPress(e);
+		})
+		.on('touchend', (e)=>{
+			this.onChartPress(e);
+		})
 		this.app.stage.addChild(this.chart.view);
 		this.app.stage.addChild(this.chart.panel);
 		this.app.stage.addChild(this.chart.bottomPanel);
@@ -42,11 +50,22 @@ export default {
 		this.renderAfterToggle(this.afterToggle);
 		this.createChartTumblers();
 		this.line = new Graphics();
-		this.renderVerticalLine(this.line);
+		this.lineTextContainer = new Container();
+		this.lineTextContainer.name = 'lineTextContainer';
+		this.lineTexts = [];
+		this.lineTextContainerRect = new Graphics();
+	
 		this.app.stage.addChild(this.toggle);
 		this.app.stage.addChild(this.beforeToggle);
 		this.app.stage.addChild(this.afterToggle);
 		this.app.stage.addChild(this.line);
+		this.lineTextContainer.addChild(this.lineTextContainerRect);
+		this.app.stage.addChild(this.lineTextContainer);
+		this.renderVerticalLine(this.line);
+	},
+	onChartPress:function(event){
+		var x = event.data.global.x;
+
 	},
 	renderVerticalLine:function(line){
 		var dots = this.chart.getChartDots(this.width*0.5)
@@ -54,11 +73,29 @@ export default {
 		var x = dots.length?dots[0].x : this.width*0.5;
 		line.moveTo(x, 0);
 		line.lineTo(x, this.CHART_HEIGHT * this.height);
+		let text = "";
+		this.lineTexts.slice().forEach(child=>{
+			this.lineTextContainer.removeChild(child);
+		})
+
+		dots.forEach((chart, id)=>{	
+			var text = new Text(`${chart.name} : ${chart.value}`, {...defTextStyle, fill:chart.color});
+			this.lineTexts.push(text);
+			text.y = text.height * id;
+			this.lineTextContainer.addChild(text);
+		})
 		dots.forEach(({color, y})=>{
 			line.beginFill(color, 1);
 		    line.drawCircle(x, y, 4);
-		})
-		line.endFill();
+		    line.endFill();
+		});
+		var contWidth = this.lineTextContainer.width + this.lineTextContainer.width* 0.3;
+		var contHeight = this.lineTextContainer.height;
+		this.lineTextContainerRect.beginFill(0xFFFFFF, 1);
+		this.lineTextContainerRect.drawRect(0, 0,contWidth, contHeight);
+		this.lineTextContainerRect.endFill();
+		this.lineTextContainer.x = x + this.width*0.01;
+		this.lineTextContainer.y = 0;
 	},
 	createChartTumblers:function(){
 		this.excludeCharts = [];
@@ -223,6 +260,7 @@ export default {
 		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
 		this.renderTumblers();
 		this.line.clear();
+		this.lineTextContainerRect.clear();
 		this.renderVerticalLine(this.line);
 	},
 	onResize:function(width, height){
@@ -242,6 +280,7 @@ export default {
 		this.chart.view.x = 0 - (this.chart.view.width * this.startDot); 
 		this.chartMap.view.y = this.height * (this.CHART_HEIGHT + this.CHART_MAP_HEIGHT);
 		this.line.clear();
+		this.lineTextContainerRect.clear();
 		this.renderVerticalLine(this.line);
 	},
 	dragLeft:function(x){

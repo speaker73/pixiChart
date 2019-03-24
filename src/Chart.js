@@ -101,11 +101,11 @@ export default {
 	},
 	drawNumbers:function(){
 		if(this.showY){
-			this.view.lineStyle(0.2, 0xFFFFFF, 0.5, true);
+			this.view.lineStyle(1, 0xFFFFFF, 0.5, true);
 			this.view.moveTo(0, 0);
-			for(var i=0; i<1; i+=0.1){
+			for(var i=0; i<1; i+=0.2){
 				this.view.lineTo(this.width, this.height * i);
-				this.view.moveTo(0, this.height * (i+0.1) );
+				this.view.moveTo(0, this.height * (i+0.2) );
 			}
 			var width = this.showY.width || 20;
 			var background = this.showY.background || 0x000000;
@@ -120,7 +120,7 @@ export default {
 	},
 	createText:function(){
 		var textStyle = this.showY.textStyle || defTextStyle;	
-		for(var i=0; i<1; i+=0.1){
+		for(var i=0; i<1; i+=0.2){
 			var text = new Text('', textStyle);
 			this.texts.push(text);
 			this.panel.addChild(text);
@@ -133,13 +133,13 @@ export default {
 		var height = this.height;
 		var ky = this.ky;
 		var texts = this.texts.slice();	
-		for(var i=0; i<1; i+=0.1){
+		for(var i=0; i<1; i+=0.2){
 			var text = texts.pop();
 			text.x = 0;
 			text.y = this.height * i;
 
-			var y = text.y/height;
-			var yC = (height - y) / ky;
+			//var y = text.y/height;
+			var yC = (height - text.y) / this.ky;
 			text.text = yC.toFixed(3);
 		}
 	},
