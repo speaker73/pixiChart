@@ -51,7 +51,13 @@ export default {
 			var chart = this.charts[yName];
 			var value = chart.yColumn[id];
 			var res = calcY([this.xColumn[id-1], chart.yColumn[id-1], this.xColumn[id], chart.yColumn[id] ], sourceDate);
-			
+			const deltaModule = Math.sqrt((sourceDate - xValue) * (sourceDate - xValue));
+			if(deltaModule <= 10000000){
+				res = {
+					x:xValue,
+					y:chart.yColumn[id]
+				};
+			}
 			return{
 				color : chart.color,
 				y: this.height - (res.y * this.ky),
