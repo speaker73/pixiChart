@@ -1,14 +1,5 @@
 import { Graphics, Text, Container } from 'pixi.js';
-
-function findColum(columnName){
-	return function(column){
-		return column[0] === columnName;
-	}
-}
-
-function colorToHex(color){
-	return Number("0x" +  String(color).slice(1))
-}
+import {calcY, findColum, colorToHex} from './utils';
 
 var defTextStyle = {fontFamily : 'Arial', fontSize: 12, align:'left', fill:"#FFFFFF" };
 export default {
@@ -51,19 +42,24 @@ export default {
 			.map(function(val, id){
 				return {val, id}
 			})
-			.find(function({val}){
-				return val >= sourceDate;
+			.find(function({val, id}){
+				console.log(id%2, id)
+				return  val >= sourceDate;
 			}) || {};
+
 
 		var result = filteredCharts.map( yName =>{
 			var chart = this.charts[yName];
 			var value = chart.yColumn[id];
+			var res = calcY([this.xColumn[id-1], chart.yColumn[id-1], this.xColumn[id], chart.yColumn[id] ], sourceDate);
+			
 			return{
 				color : chart.color,
-				y: this.height - (value * this.ky),
+				y: this.height - (res.y * this.ky),
 				name:this.data.names[yName],
-				value,
-				x:((xValue - this.xStart) * this.kx) + this.view.x,
+				value:res.y,
+				//x:((res.x - this.xStart) * this.kx) + this.view.x,
+				x,
 				yName
 			}	
 		})
