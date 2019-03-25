@@ -3,8 +3,8 @@ import chart_data from './chart_data.json';
 
 var charts = [];
 
-var wK = 0.6;
-var hK = 0.49;
+var wK = 0.9;
+var hK = 0.9;
 chart_data.forEach(function(data){
 	var chart = Object.create(ChartApp);
 	chart.create('chart-box', data, window.innerWidth * wK, window.innerHeight * hK, 0.1, 0.3);

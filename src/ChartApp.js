@@ -1,8 +1,21 @@
-import { Application, Graphics, Text, Container } from 'pixi.js';
+import { Application, Graphics, Text, Container, CANVAS_RENDERER } from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import Chart from './Chart';
+
+PIXI.CANVAS_RENDERER = false;
 
 var options = {
 	antialias: true,
+	autoResize: true,
+	resolution:window.devicePixelRatio||1,
+    /*        transparent: false,
+            antialias: false,
+            preserveDrawingBuffer: false,
+            resolution: window.devicePixelRatio || 1,
+            clearBeforeRender: true,
+            forceCanvas: window.PIXI.CANVAS_RENDERER,
+            // powerPreference: "high-performance"*/
+            legacy: true
 };
 
 function colorToHex(color){
@@ -14,8 +27,10 @@ export default {
 	create:function(containerId, data, width, height, startDot, endDot){
 		this.CHART_HEIGHT = 0.6;
 		this.CHART_MAP_HEIGHT = 0.1;
-		this.MIN_TOGGLE = 0.1;
+		this.MIN_TOGGLE = 0.2;
 		this.SHADOW_ALPHA = 0.3;
+		this.LINE_DOTS_RADIUS = 8;
+		this.CHART_MAP_DRAG_ZONE = 6;
 		this.lineCord = 0.5;
 		this.dragLeft = this.dragLeft.bind(this);
 		this.move = this.move.bind(this);
@@ -94,7 +109,7 @@ export default {
 		})
 		dots.forEach(({color, y})=>{
 			line.beginFill(color, 1);
-		    line.drawCircle(x, y, 4);
+		    line.drawCircle(x, y, this.LINE_DOTS_RADIUS);
 		    line.endFill();
 		});
 		var contWidth = this.lineTextContainer.width + this.lineTextContainer.width* 0.3;
@@ -341,8 +356,8 @@ export default {
 	        var width = endDot - startDot;
 	        var deltaX = event.data.global.x - self.startX;
 	  		var x = startDot + deltaX;
-	  		var isDragLeft = (self.startX - startDot) <=5 && ((self.startX - startDot) >= 0);
-	  		var isDragRight = (endDot - self.startX) <=5 && ((endDot - self.startX) >= 0);
+	  		var isDragLeft = (self.startX - startDot) <=this.CHART_MAP_DRAG_ZONE && ((self.startX - startDot) >= 0);
+	  		var isDragRight = (endDot - self.startX) <=this.CHART_MAP_DRAG_ZONE && ((endDot - self.startX) >= 0);
 	  		if(isDragLeft){
 				if( this.dragLeft(x/this.width) )
 					self.startX = event.data.global.x;

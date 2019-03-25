@@ -5,9 +5,14 @@ module.exports = {
   mode:'development',
   
   output: {
-    filename: 'graph.js',
+    filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist')
   },
-  watch: true,
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 8000,
+    host:'192.168.73.9'
+  }
 
 };

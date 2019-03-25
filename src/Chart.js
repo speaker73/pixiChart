@@ -72,7 +72,7 @@ export default {
 			this.bottomPanel.drawRect(0, this.height, w, h);
 			this.bottomPanel.endFill();
 			var textStyle = this.showY.textStyle || defTextStyle;	
-			for(var i=0; i<1; i+=0.1){
+			for(var i=0; i<1; i+=0.2){
 				var text = new Text('1000', textStyle);
 				this.bottomPanel.addChild(text);
 				this.dateTexts.push(text);
@@ -82,7 +82,7 @@ export default {
 	setDates:function(){
 		if(this.showX){
 			var dateTexts = this.dateTexts.slice();
-			for(var i=0; i<1; i+=0.1){
+			for(var i=0; i<1; i+=0.2){
 				var text = dateTexts.pop();
 				var x = this.showX.width * i;
 				text.x = x;
@@ -98,7 +98,7 @@ export default {
 	},
 	drawNumbers:function(){
 		if(this.showY){
-			this.view.lineStyle(1, 0xFFFFFF, 0.5, true);
+			this.view.lineStyle(0.5, 0xFFFFFF, 0.5, true);
 			this.view.moveTo(0, 0);
 			for(var i=0; i<1; i+=0.2){
 				this.view.lineTo(this.width, this.height * i);
