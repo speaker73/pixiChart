@@ -43,7 +43,6 @@ export default {
 				return {val, id}
 			})
 			.find(function({val, id}){
-				console.log(id%2, id)
 				return  val >= sourceDate;
 			}) || {};
 
@@ -57,7 +56,7 @@ export default {
 				color : chart.color,
 				y: this.height - (res.y * this.ky),
 				name:this.data.names[yName],
-				value:res.y,
+				value:res.y.toFixed(3),
 				//x:((res.x - this.xStart) * this.kx) + this.view.x,
 				x,
 				yName
